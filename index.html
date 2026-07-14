@@ -3,152 +3,138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1f7f5c" />
-  <meta name="description" content="DVM-675 AI 챗봇 - 모델 교체 및 포장 정보 제공" />
+  <title>C&M Smart AI Chatbot</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2d8659" />
+  <meta name="description" content="C&M Smart AI Chatbot - DVM-675 정보 제공" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="DVM-675" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%231f7f5c' width='192' height='192'/><text x='50%' y='50%' font-size='120' fill='white' text-anchor='middle' dominant-baseline='central' font-weight='bold'>D</text></svg>" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%231f7f5c' width='192' height='192'/><text x='50%' y='50%' font-size='120' fill='white' text-anchor='middle' dominant-baseline='central' font-weight='bold'>D</text></svg>" />
-  <title>C&M Smart AI Chatbot</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <meta name="apple-mobile-web-app-title" content="C&M Chatbot" />
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     :root {
       --surface-0: #ffffff;
       --surface-1: #f5f5f5;
-      --surface-2: #efefef;
       --text-primary: #000000;
       --text-secondary: #666666;
       --text-muted: #999999;
-      --bot-bg: #efefef;
+      --bot-bg: #e8e8e8;
       --bot-text: #000000;
-      --user-bg: #1f7f5c;
+      --user-bg: #0084ff;
       --user-text: #ffffff;
-      --accent: #1f7f5c;
+      --accent: #2d8659;
       --border: #d4d4d4;
-      color-scheme: light;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
         --surface-0: #0a0a0a;
         --surface-1: #1a1a1a;
-        --surface-2: #242424;
-        --text-primary: #f0f0f0;
+        --text-primary: #ffffff;
         --text-secondary: #b0b0b0;
         --text-muted: #808080;
         --bot-bg: #2a2a2a;
-        --bot-text: #f0f0f0;
-        --user-bg: #1f7f5c;
-        --user-text: #ffffff;
-        --accent: #66bb6a;
+        --bot-text: #ffffff;
         --border: #333333;
       }
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #app { width: 100%; height: 100%; }
-    
     body {
-      background: var(--surface-0);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--surface-0);
       color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+      height: 100vh;
+      display: flex;
       overflow: hidden;
     }
 
-    .container {
-      width: 100%;
-      height: 100%;
+    #app {
+      flex: 1;
       display: flex;
       flex-direction: column;
+      height: 100vh;
     }
 
-    /* 헤더 */
     .header {
-      padding: 12px 16px;
-      background: var(--surface-0);
+      background-color: var(--surface-1);
       border-bottom: 1px solid var(--border);
+      padding: 16px;
       display: flex;
       align-items: center;
       gap: 12px;
-      flex-shrink: 0;
     }
 
     .header-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--accent), #2d9b4e);
+      width: 40px;
+      height: 40px;
+      background-color: var(--accent);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 18px;
-      flex-shrink: 0;
+      font-weight: bold;
+      font-size: 20px;
     }
 
-    .header-title h2 {
-      font-size: 15px;
+    .header-title {
+      font-size: 16px;
       font-weight: 600;
-      margin: 0;
     }
 
-    .header-title p {
+    .header-status {
       font-size: 12px;
       color: var(--text-muted);
-      margin: 2px 0 0 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
     }
 
-    /* 메시지 영역 */
     .messages {
       flex: 1;
       overflow-y: auto;
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      background: var(--surface-0);
+      gap: 8px;
     }
 
     .message-group {
       display: flex;
-      gap: 8px;
-      animation: slideIn 0.3s ease;
       align-items: flex-end;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .message-group.bot {
+      justify-content: flex-start;
     }
 
     .message-group.user {
-      flex-direction: row-reverse;
-      justify-content: flex-end;
+      justify-content: flex-end !important;
+      flex-direction: row-reverse !important;
+      margin-left: auto !important;
+      margin-right: 0 !important;
     }
 
     .message-icon {
       width: 32px;
       height: 32px;
-      background: linear-gradient(135deg, var(--accent), #2d9b4e);
+      background-color: var(--accent);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 14px;
+      font-weight: bold;
+      font-size: 16px;
       flex-shrink: 0;
-    }
-
-    .message-group.user .message-icon {
-      display: none;
     }
 
     .message-content {
@@ -156,125 +142,109 @@
       flex-direction: column;
       gap: 4px;
       max-width: 70%;
+      width: auto;
     }
 
     .message-group.user .message-content {
-      max-width: 85%;
       align-items: flex-end;
     }
 
     .message-bubble {
+      background-color: var(--bot-bg);
+      color: var(--bot-text);
       padding: 10px 14px;
-      border-radius: 12px;
+      border-radius: 12px 12px 12px 0;
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.5;
       word-break: break-word;
       white-space: pre-wrap;
     }
 
-    .message-group.bot .message-bubble {
-      background: var(--bot-bg);
-      color: var(--bot-text);
-      border-radius: 12px 12px 12px 4px;
-    }
-
     .message-group.user .message-bubble {
-      background: var(--user-bg);
+      background-color: var(--user-bg);
       color: var(--user-text);
-      border-radius: 12px 4px 12px 12px;
+      border-radius: 12px 12px 0 12px;
     }
 
     .message-time {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
-      min-width: 40px;
-      text-align: right;
+      margin: 0 8px;
     }
 
-    .message-group.user .message-time {
-      text-align: left;
-    }
-
-    /* 리스트 아이템 */
-    .list-items {
+    .buttons-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
+      max-width: 70%;
+      margin-top: 8px;
     }
 
-    .list-item {
-      padding: 10px 12px;
-      background: var(--surface-1);
-      border: 1px solid var(--border);
+    .btn {
+      padding: 12px 16px;
+      background-color: var(--surface-1);
+      border: 2px solid var(--border);
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s;
       font-size: 13px;
       color: var(--text-primary);
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-align: left;
+      transition: all 0.2s;
+      text-align: center;
     }
 
-    .list-item:hover {
-      background: var(--surface-2);
+    .btn:hover {
       border-color: var(--accent);
       color: var(--accent);
     }
 
-    .list-item:active {
+    .btn:active {
       transform: scale(0.98);
     }
 
-    .list-number {
-      width: 20px;
-      height: 20px;
-      background: var(--accent);
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 600;
-      flex-shrink: 0;
-    }
-
-    /* 상세 정보 */
-    .detail-text {
-      font-size: 13px;
-      color: var(--text-primary);
-      line-height: 1.6;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    /* 모델 선택 */
-    .model-section {
-      padding: 12px 16px;
-      background: var(--surface-0);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
+    .category-buttons {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
       justify-content: center;
-      flex-shrink: 0;
+      padding: 12px;
+      background-color: var(--surface-1);
+      border-top: 1px solid var(--border);
+    }
+
+    .category-btn {
+      padding: 10px 14px;
+      background-color: var(--surface-0);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .category-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .model-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 12px;
+      background-color: var(--surface-1);
+      border-top: 1px solid var(--border);
     }
 
     .model-btn {
-      padding: 8px 14px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: var(--surface-1);
-      color: var(--text-primary);
-      font-size: 12px;
-      font-weight: 500;
+      padding: 10px 16px;
+      background-color: var(--surface-0);
+      border: 2px solid var(--border);
+      border-radius: 20px;
       cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
       transition: all 0.2s;
-      white-space: nowrap;
     }
 
     .model-btn:hover {
@@ -283,558 +253,423 @@
     }
 
     .model-btn.active {
-      background: var(--accent);
+      background-color: var(--accent);
       color: white;
       border-color: var(--accent);
     }
 
-    /* 입력 영역 */
     .input-section {
-      padding: 12px 16px;
-      background: var(--surface-0);
-      border-top: 1px solid var(--border);
       display: flex;
       gap: 8px;
-      flex-shrink: 0;
+      padding: 12px 16px;
+      background-color: var(--surface-1);
+      border-top: 1px solid var(--border);
     }
 
-    .input-box {
+    .input-field {
       flex: 1;
-      padding: 10px 14px;
       border: 1px solid var(--border);
       border-radius: 20px;
-      background: var(--surface-1);
-      color: var(--text-primary);
+      padding: 10px 16px;
       font-size: 14px;
+      background-color: var(--surface-0);
+      color: var(--text-primary);
       font-family: inherit;
       outline: none;
-      transition: border-color 0.2s;
     }
 
-    .input-box:focus {
+    .input-field:focus {
       border-color: var(--accent);
-    }
-
-    .input-box::placeholder {
-      color: var(--text-muted);
     }
 
     .send-btn {
-      width: 36px;
-      height: 36px;
-      padding: 0;
-      border: none;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      background: var(--accent);
+      background-color: var(--accent);
       color: white;
-      font-size: 16px;
+      border: none;
       cursor: pointer;
-      transition: all 0.2s;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
     }
 
     .send-btn:hover {
-      opacity: 0.8;
-    }
-
-    .send-btn:active {
-      transform: scale(0.95);
-    }
-
-    .send-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* 반응형 */
-    @media (max-width: 480px) {
-      .message-content {
-        max-width: 80%;
-      }
-
-      .message-group.user .message-content {
-        max-width: 90%;
-      }
-
-      .model-section {
-        overflow-x: auto;
-        justify-content: flex-start;
-      }
+      opacity: 0.9;
     }
 
     ::-webkit-scrollbar {
-      width: 6px;
+      width: 8px;
     }
 
     ::-webkit-scrollbar-track {
-      background: transparent;
+      background: var(--surface-0);
     }
 
     ::-webkit-scrollbar-thumb {
       background: var(--border);
-      border-radius: 3px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--text-secondary);
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app">
+    <div class="header">
+      <div class="header-icon">💬</div>
+      <div>
+        <div class="header-title">C&M Smart AI Chatbot</div>
+        <div class="header-status">
+          <span>● 온라인 상태</span>
+        </div>
+      </div>
+    </div>
 
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <div class="messages" id="messages"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    <div class="category-buttons" id="categoryButtons"></div>
+
+    <div class="model-buttons" id="modelButtons"></div>
+
+    <div class="input-section">
+      <input type="text" class="input-field" id="inputField" placeholder="무엇이든 물어보세요." />
+      <button class="send-btn" id="sendBtn">➤</button>
+    </div>
+  </div>
+
+  <script>
+    const models = ['DVM-675A/B', 'DVM-675E/F', 'DVM-675L', 'DVM-675G', 'DVM-675H'];
+    const categories = ['· 모델 교체 사양', '· 모델 교체 순서', '· 포장 순서'];
 
     const infoData = {
       'DVM-675A/B': {
-        '모델 교체 사양': {
-          intro: '모델 교체 사양에 대해 알려 드리겠습니다!',
-          items: [
-            '675A/B는',
-            '> 하우징 : 600W',
-            '> 하네스 : A_흰색, B_노란색',
-            '> 샤프트 : 200mm'
-          ]
-        },
-        '모델 교체 순서': {
-          intro: '모델 교체 순서에 대해 알려 드리겠습니다!',
-          items: [
-            '1. 하우징 변경',
-            '2. 모델 별 Rotor 확인 및 Robot 대차 투입 → Start',
-            '3. 모델 별 Shaft JIG 길이 확인',
-            '4. 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)',
-            '5. 착자 공정 600W or 900W 설정 (마우스 클릭)',
-            '6. 역기 전력 PC 600W or 900W 설정 (마우스 클릭)',
-            '7. 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)',
-            '8. 내전압 PC 모델명 변경 (마우스 클릭)',
-            '9. MES PC 실적 모델 변경 (마우스 클릭)'
-          ]
-        },
-        '포장 순서': {
-          intro: '포장 순서에 대해 알려 드리겠습니다!',
-          items: [
-            '1. 파렛트 준비',
-            '2. 포장물 준비 (하부 커버 → 비닐백 → PAD)',
-            '3. 포장물 내 DVM Cross PAD 펼치기',
-            '4. 실리카겔 - Cross PAD 1층마다 1개 넣기',
-            '5. 양산 제품 순차 적재 (1단 : 16개)',
-            '6. (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)',
-            '   * 4단 : 64개 완료 시 PAD 안착 마무리',
-            '7. 비닐백 씌우기',
-            '8. Side Box 씌우기',
-            '9. 상부 커버 닫기',
-            '10. Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)',
-            '11. 제품 밴딩',
-            '12. 출하 라벨 부착'
-          ]
-        }
+        '· 모델 교체 사양': `모델 교체 사양
+
+675A/B는
+- 하우징 : 600W
+- 하네스 : A_흰색, B_노란색
+- 샤프트 : 200mm`,
+        '· 모델 교체 순서': `모델 교체 순서
+
+1) 하우징 변경
+2) 모델 별 Rotor 확인 및 Robot 대차 투입 → Start
+3) 모델 별 Shaft JIG 길이 확인
+4) 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)
+5) 착자 공정 600W or 900W 설정 (마우스 클릭)
+6) 역기 전력 PC 600W or 900W 설정 (마우스 클릭)
+7) 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)
+8) 내전압 PC 모델명 변경(마우스 클릭)
+9) MES PC 실적 모델 변경 (마우스 클릭)`,
+        '· 포장 순서': `포장 순서
+
+1) 파렛트 준비
+2) 포장물 준비 (하부 커버 → 비닐백 → PAD)
+3) 포장물 내 DVM Cross PAD 펼치기
+4) 실리카겔 - Cross PAD 1층마다 1개 넣기
+5) 양산 제품 순차 적재 (1단 : 16개)
+6) (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)
+   * 4단 : 64개 완료 시 PAD 안착 마무리
+7) 비닐백 씌우기
+8) Side Box 씌우기
+9) 상부 커버 닫기
+10) Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)
+11) 제품 밴딩
+12) 출하 라벨 부착`
       },
       'DVM-675E/F': {
-        '모델 교체 사양': {
-          intro: '모델 교체 사양에 대해 알려 드리겠습니다!',
-          items: [
-            '675E/F는',
-            '> 하우징 : 600W',
-            '> 하네스 : E_흰색, F_노란색',
-            '> 샤프트 : 250mm'
-          ]
-        },
-        '모델 교체 순서': {
-          intro: '모델 교체 순서에 대해 알려 드리겠습니다!',
-          items: [
-            '1. 하우징 변경',
-            '2. 모델 별 Rotor 확인 및 Robot 대차 투입 → Start',
-            '3. 모델 별 Shaft JIG 길이 확인',
-            '4. 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)',
-            '5. 착자 공정 600W or 900W 설정 (마우스 클릭)',
-            '6. 역기 전력 PC 600W or 900W 설정 (마우스 클릭)',
-            '7. 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)',
-            '8. 내전압 PC 모델명 변경 (마우스 클릭)',
-            '9. MES PC 실적 모델 변경 (마우스 클릭)'
-          ]
-        },
-        '포장 순서': {
-          intro: '포장 순서에 대해 알려 드리겠습니다!',
-          items: [
-            '1. 파렛트 준비',
-            '2. 포장물 준비 (하부 커버 → 비닐백 → PAD)',
-            '3. 포장물 내 DVM Cross PAD 펼치기',
-            '4. 실리카겔 - Cross PAD 1층마다 1개 넣기',
-            '5. 양산 제품 순차 적재 (1단 : 16개)',
-            '6. (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)',
-            '   * 4단 : 64개 완료 시 PAD 안착 마무리',
-            '7. 비닐백 씌우기',
-            '8. Side Box 씌우기',
-            '9. 상부 커버 닫기',
-            '10. Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)',
-            '11. 제품 밴딩',
-            '12. 출하 라벨 부착'
-          ]
-        }
+        '· 모델 교체 사양': `모델 교체 사양
+
+675E/F는
+- 하우징 : 600W
+- 하네스 : E_흰색, F_노란색
+- 샤프트 : 250mm`,
+        '· 모델 교체 순서': `모델 교체 순서
+
+1) 하우징 변경
+2) 모델 별 Rotor 확인 및 Robot 대차 투입 → Start
+3) 모델 별 Shaft JIG 길이 확인
+4) 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)
+5) 착자 공정 600W or 900W 설정 (마우스 클릭)
+6) 역기 전력 PC 600W or 900W 설정 (마우스 클릭)
+7) 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)
+8) 내전압 PC 모델명 변경(마우스 클릭)
+9) MES PC 실적 모델 변경 (마우스 클릭)`,
+        '· 포장 순서': `포장 순서
+
+1) 파렛트 준비
+2) 포장물 준비 (하부 커버 → 비닐백 → PAD)
+3) 포장물 내 DVM Cross PAD 펼치기
+4) 실리카겔 - Cross PAD 1층마다 1개 넣기
+5) 양산 제품 순차 적재 (1단 : 16개)
+6) (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)
+   * 4단 : 64개 완료 시 PAD 안착 마무리
+7) 비닐백 씌우기
+8) Side Box 씌우기
+9) 상부 커버 닫기
+10) Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)
+11) 제품 밴딩
+12) 출하 라벨 부착`
       },
       'DVM-675L': {
-        '모델 교체 사양': {
-          intro: '모델 교체 사양에 대해 알려 드리겠습니다!',
-          items: [
-            '675L은',
-            '> 하우징 : 900W',
-            '> 하네스 : 파란색',
-            '> 샤프트 : 220mm'
-          ]
-        },
-        '모델 교체 순서': {
-          intro: '모델 교체 순서에 대해 알려 드리겠습니다!',
-          items: [
-            '1. 하우징 변경',
-            '2. 모델 별 Rotor 확인 및 Robot 대차 투입 → Start',
-            '3. 모델 별 Shaft JIG 길이 확인',
-            '4. 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)',
-            '5. 착자 공정 600W or 900W 설정 (마우스 클릭)',
-            '6. 역기 전력 PC 600W or 900W 설정 (마우스 클릭)',
-            '7. 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)',
-            '8. 내전압 PC 모델명 변경 (마우스 클릭)',
-            '9. MES PC 실적 모델 변경 (마우스 클릭)'
-          ]
-        },
-        '포장 순서': {
-          intro: '포장 순서에 대해 알려 드리겠습니다!',
-          items: [
-            '1. 파렛트 준비',
-            '2. 포장물 준비 (하부 커버 → 비닐백 → PAD)',
-            '3. 포장물 내 DVM Cross PAD 펼치기',
-            '4. 실리카겔 - Cross PAD 1층마다 1개 넣기',
-            '5. 양산 제품 순차 적재 (1단 : 16개)',
-            '6. (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)',
-            '   * 4단 : 64개 완료 시 PAD 안착 마무리',
-            '7. 비닐백 씌우기',
-            '8. Side Box 씌우기',
-            '9. 상부 커버 닫기',
-            '10. Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)',
-            '11. 제품 밴딩',
-            '12. 출하 라벨 부착'
-          ]
-        }
+        '· 모델 교체 사양': `모델 교체 사양
+
+675L는
+- 하우징 : 900W
+- 하네스 : 파란색
+- 샤프트 : 220mm`,
+        '· 모델 교체 순서': `모델 교체 순서
+
+1) 하우징 변경
+2) 모델 별 Rotor 확인 및 Robot 대차 투입 → Start
+3) 모델 별 Shaft JIG 길이 확인
+4) 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)
+5) 착자 공정 600W or 900W 설정 (마우스 클릭)
+6) 역기 전력 PC 600W or 900W 설정 (마우스 클릭)
+7) 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)
+8) 내전압 PC 모델명 변경(마우스 클릭)
+9) MES PC 실적 모델 변경 (마우스 클릭)`,
+        '· 포장 순서': `포장 순서
+
+1) 파렛트 준비
+2) 포장물 준비 (하부 커버 → 비닐백 → PAD)
+3) 포장물 내 DVM Cross PAD 펼치기
+4) 실리카겔 - Cross PAD 1층마다 1개 넣기
+5) 양산 제품 순차 적재 (1단 : 16개)
+6) (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)
+   * 4단 : 64개 완료 시 PAD 안착 마무리
+7) 비닐백 씌우기
+8) Side Box 씌우기
+9) 상부 커버 닫기
+10) Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)
+11) 제품 밴딩
+12) 출하 라벨 부착`
       },
       'DVM-675G': {
-        '모델 교체 사양': {
-          intro: '모델 교체 사양에 대해 알려 드리겠습니다!',
-          items: [
-            '675G는',
-            '> 하우징 : 900W',
-            '> 하네스 : 초록색',
-            '> 샤프트 : 200mm'
-          ]
-        },
-        '모델 교체 순서': {
-          intro: '모델 교체 순서에 대해 알려 드리겠습니다!',
-          items: [
-            '1. 하우징 변경',
-            '2. 모델 별 Rotor 확인 및 Robot 대차 투입 → Start',
-            '3. 모델 별 Shaft JIG 길이 확인',
-            '4. 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)',
-            '5. 착자 공정 600W or 900W 설정 (마우스 클릭)',
-            '6. 역기 전력 PC 600W or 900W 설정 (마우스 클릭)',
-            '7. 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)',
-            '8. 내전압 PC 모델명 변경 (마우스 클릭)',
-            '9. MES PC 실적 모델 변경 (마우스 클릭)'
-          ]
-        },
-        '포장 순서': {
-          intro: '포장 순서에 대해 알려 드리겠습니다!',
-          items: [
-            '1. 파렛트 준비',
-            '2. 포장물 준비 (하부 커버 → 비닐백 → PAD)',
-            '3. 포장물 내 DVM Cross PAD 펼치기',
-            '4. 실리카겔 - Cross PAD 1층마다 1개 넣기',
-            '5. 양산 제품 순차 적재 (1단 : 16개)',
-            '6. (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)',
-            '   * 4단 : 64개 완료 시 PAD 안착 마무리',
-            '7. 비닐백 씌우기',
-            '8. Side Box 씌우기',
-            '9. 상부 커버 닫기',
-            '10. Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)',
-            '11. 제품 밴딩',
-            '12. 출하 라벨 부적'
-          ]
-        }
+        '· 모델 교체 사양': `모델 교체 사양
+
+675G는
+- 하우징 : 900W
+- 하네스 : 초록색
+- 샤프트 : 200mm`,
+        '· 모델 교체 순서': `모델 교체 순서
+
+1) 하우징 변경
+2) 모델 별 Rotor 확인 및 Robot 대차 투입 → Start
+3) 모델 별 Shaft JIG 길이 확인
+4) 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)
+5) 착자 공정 600W or 900W 설정 (마우스 클릭)
+6) 역기 전력 PC 600W or 900W 설정 (마우스 클릭)
+7) 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)
+8) 내전압 PC 모델명 변경(마우스 클릭)
+9) MES PC 실적 모델 변경 (마우스 클릭)`,
+        '· 포장 순서': `포장 순서
+
+1) 파렛트 준비
+2) 포장물 준비 (하부 커버 → 비닐백 → PAD)
+3) 포장물 내 DVM Cross PAD 펼치기
+4) 실리카겔 - Cross PAD 1층마다 1개 넣기
+5) 양산 제품 순차 적재 (1단 : 16개)
+6) (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)
+   * 4단 : 64개 완료 시 PAD 안착 마무리
+7) 비닐백 씌우기
+8) Side Box 씌우기
+9) 상부 커버 닫기
+10) Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)
+11) 제품 밴딩
+12) 출하 라벨 부착`
       },
       'DVM-675H': {
-        '모델 교체 사양': {
-          intro: '모델 교체 사양에 대해 알려 드리겠습니다!',
-          items: [
-            '675H는',
-            '> 하우징 : 600W',
-            '> 하네스 : 빨간색',
-            '> 샤프트 : 200mm'
-          ]
-        },
-        '모델 교체 순서': {
-          intro: '모델 교체 순서에 대해 알려 드리겠습니다!',
-          items: [
-            '1. 하우징 변경',
-            '2. 모델 별 Rotor 확인 및 Robot 대차 투입 → Start',
-            '3. 모델 별 Shaft JIG 길이 확인',
-            '4. 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)',
-            '5. 착자 공정 600W or 900W 설정 (마우스 클릭)',
-            '6. 역기 전력 PC 600W or 900W 설정 (마우스 클릭)',
-            '7. 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)',
-            '8. 내전압 PC 모델명 변경 (마우스 클릭)',
-            '9. MES PC 실적 모델 변경 (마우스 클릭)'
-          ]
-        },
-        '포장 순서': {
-          intro: '포장 순서에 대해 알려 드리겠습니다!',
-          items: [
-            '1. 파렛트 준비',
-            '2. 포장물 준비 (하부 커버 → 비닐백 → PAD)',
-            '3. 포장물 내 DVM Cross PAD 펼치기',
-            '4. 실리카겔 - Cross PAD 1층마다 1개 넣기',
-            '5. 양산 제품 순차 적재 (1단 : 16개)',
-            '6. (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)',
-            '   * 4단 : 64개 완료 시 PAD 안착 마무리',
-            '7. 비닐백 씌우기',
-            '8. Side Box 씌우기',
-            '9. 상부 커버 닫기',
-            '10. Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)',
-            '11. 제품 밴딩',
-            '12. 출하 라벨 부착'
-          ]
-        }
+        '· 모델 교체 사양': `모델 교체 사양
+
+675H는
+- 하우징 : 600W
+- 하네스 : 빨간색
+- 샤프트 : 200mm`,
+        '· 모델 교체 순서': `모델 교체 순서
+
+1) 하우징 변경
+2) 모델 별 Rotor 확인 및 Robot 대차 투입 → Start
+3) 모델 별 Shaft JIG 길이 확인
+4) 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)
+5) 착자 공정 600W or 900W 설정 (마우스 클릭)
+6) 역기 전력 PC 600W or 900W 설정 (마우스 클릭)
+7) 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)
+8) 내전압 PC 모델명 변경(마우스 클릭)
+9) MES PC 실적 모델 변경 (마우스 클릭)`,
+        '· 포장 순서': `포장 순서
+
+1) 파렛트 준비
+2) 포장물 준비 (하부 커버 → 비닐백 → PAD)
+3) 포장물 내 DVM Cross PAD 펼치기
+4) 실리카겔 - Cross PAD 1층마다 1개 넣기
+5) 양산 제품 순차 적재 (1단 : 16개)
+6) (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)
+   * 4단 : 64개 완료 시 PAD 안착 마무리
+7) 비닐백 씌우기
+8) Side Box 씌우기
+9) 상부 커버 닫기
+10) Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)
+11) 제품 밴딩
+12) 출하 라벨 부착`
       }
     };
 
-    const models = ['DVM-675A/B', 'DVM-675E/F', 'DVM-675L', 'DVM-675G', 'DVM-675H'];
-    const categories = ['모델 교체 사양', '모델 교체 순서', '포장 순서'];
+    let selectedModel = null;
+    const messagesDiv = document.getElementById('messages');
+    const modelButtonsDiv = document.getElementById('modelButtons');
+    const categoryButtonsDiv = document.getElementById('categoryButtons');
+    const inputField = document.getElementById('inputField');
+    const sendBtn = document.getElementById('sendBtn');
 
-    function App() {
-      const [selectedModel, setSelectedModel] = useState('DVM-675A/B');
-      const [selectedCategory, setSelectedCategory] = useState(null);
-      const [input, setInput] = useState('');
-      const [messages, setMessages] = useState([
-        {
-          type: 'bot',
-          text: '안녕하세요! 👋\nDVM-675 정보를 알려드리겠습니다.',
-          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-      const messagesEndRef = useRef(null);
-
-      useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, [messages]);
-
-      const handleModelSelect = (model) => {
-        // 이미 선택된 모델이면 메시지 보내지 않음
-        if (selectedModel === model) {
-          return;
-        }
-
-        setSelectedModel(model);
-        setSelectedCategory(null);
-        setMessages(prev => [...prev, 
-          {
-            type: 'user',
-            text: model,
-            time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-          },
-          {
-            type: 'bot',
-            text: `${model} 모델이 선택되었습니다!`,
-            hasCategories: true,
-            time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-          }
-        ]);
-      };
-
-      const handleCategorySelect = (category) => {
-        setSelectedCategory(category);
-        const data = infoData[selectedModel][category];
-        setMessages(prev => [...prev, 
-          {
-            type: 'user',
-            text: `· ${category}`,
-            time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-          },
-          {
-            type: 'bot',
-            text: data.intro,
-            details: data.items,
-            time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-          }
-        ]);
-      };
-
-      const handleTextInput = (text) => {
-        if (!text.trim()) return;
-
-        setMessages(prev => [...prev, {
-          type: 'user',
-          text: text,
-          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-        }]);
-
-        const lowerText = text.toLowerCase();
-        let foundCategory = null;
-        let foundModel = selectedModel;
-
-        if (lowerText.includes('675a') || lowerText.includes('a/b')) foundModel = 'DVM-675A/B';
-        else if (lowerText.includes('675e') || lowerText.includes('e/f')) foundModel = 'DVM-675E/F';
-        else if (lowerText.includes('675l')) foundModel = 'DVM-675L';
-        else if (lowerText.includes('675g')) foundModel = 'DVM-675G';
-        else if (lowerText.includes('675h')) foundModel = 'DVM-675H';
-
-        if (lowerText.includes('사양')) {
-          foundCategory = '모델 교체 사양';
-        } else if (lowerText.includes('순서')) {
-          foundCategory = '모델 교체 순서';
-        } else if (lowerText.includes('포장')) {
-          foundCategory = '포장 순서';
-        }
-
-        if (foundCategory) {
-          setSelectedModel(foundModel);
-          setSelectedCategory(foundCategory);
-          const data = infoData[foundModel][foundCategory];
-          setMessages(prev => [...prev, {
-            type: 'bot',
-            text: data.intro,
-            details: data.items,
-            time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-          }]);
-        } else if (lowerText.includes('675')) {
-          setSelectedModel(foundModel);
-          setSelectedCategory(null);
-          setMessages(prev => [...prev, {
-            type: 'bot',
-            text: `${foundModel} 모델이 선택되었습니다!`,
-            hasCategories: true,
-            time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-          }]);
-        } else {
-          setMessages(prev => [...prev, {
-            type: 'bot',
-            text: `다음과 같이 입력해주세요:\n"모델 교체 사양"\n"교체 순서"\n"포장 순서"\n또는 "675A/B 포장 순서" 등`,
-            time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-          }]);
-        }
-      };
-
-      const sendMessage = () => {
-        if (!input.trim()) return;
-        handleTextInput(input);
-        setInput('');
-      };
-
-      return (
-        <div className="container">
-          <div className="header">
-            <div className="header-icon">
-              <i className="ti ti-robot"></i>
-            </div>
-            <div className="header-title">
-              <h2>C&M Smart AI Chatbot</h2>
-              <p>🟢 온라인 상태</p>
-            </div>
-          </div>
-
-          <div className="messages">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`message-group ${msg.type}`}>
-                {msg.type === 'bot' && <div className="message-icon"><i className="ti ti-robot"></i></div>}
-                
-                <div className="message-content">
-                  <div className="message-bubble">
-                    {msg.text}
-                    {msg.hasCategories && (
-                      <div className="list-items" style={{ marginTop: '8px' }}>
-                        {categories.map((cat, i) => (
-                          <button
-                            key={i}
-                            className="list-item"
-                            onClick={() => handleCategorySelect(cat)}
-                          >
-                            <div className="list-number">{i + 1}</div>
-                            {cat}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {msg.details && (
-                      <div className="detail-text" style={{ marginTop: '8px' }}>
-                        {msg.details.join('\n')}
-                      </div>
-                    )}
-                  </div>
-                  <div className="message-time">{msg.time}</div>
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <div className="model-section">
-            {models.map(model => (
-              <button
-                key={model}
-                className={`model-btn ${selectedModel === model ? 'active' : ''}`}
-                onClick={() => handleModelSelect(model)}
-              >
-                {model}
-              </button>
-            ))}
-          </div>
-
-          <div className="input-section">
-            <input
-              type="text"
-              className="input-box"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') sendMessage();
-              }}
-              placeholder="메시지를 입력하세요..."
-            />
-            <button
-              className="send-btn"
-              onClick={sendMessage}
-              disabled={!input.trim()}
-            >
-              <i className="ti ti-send"></i>
-            </button>
-          </div>
-        </div>
-      );
+    function getTime() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
     }
 
-    ReactDOM.render(<App />, document.getElementById('app'));
-
-    // PWA Service Worker 등록
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(`
-        self.addEventListener('install', (event) => {
-          self.skipWaiting();
-        });
-
-        self.addEventListener('activate', (event) => {
-          event.waitUntil(clients.claim());
-        });
-
-        self.addEventListener('fetch', (event) => {
-          event.respondWith(fetch(event.request).catch(() => {
-            return new Response('오프라인 상태입니다', { status: 503 });
-          }));
-        });
-      `)).catch(err => console.log('Service Worker 등록 실패:', err));
+    function addBotMessage(text) {
+      const group = document.createElement('div');
+      group.className = 'message-group bot';
+      
+      const icon = document.createElement('div');
+      icon.className = 'message-icon';
+      icon.textContent = '🤖';
+      
+      const content = document.createElement('div');
+      content.className = 'message-content';
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.textContent = text;
+      content.appendChild(bubble);
+      
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = getTime();
+      content.appendChild(time);
+      
+      group.appendChild(icon);
+      group.appendChild(content);
+      messagesDiv.appendChild(group);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
+
+    function addUserMessage(text) {
+      const group = document.createElement('div');
+      group.className = 'message-group user';
+      
+      const icon = document.createElement('div');
+      icon.className = 'message-icon';
+      icon.textContent = '👤';
+      
+      const content = document.createElement('div');
+      content.className = 'message-content';
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.textContent = text;
+      content.appendChild(bubble);
+      
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = getTime();
+      content.appendChild(time);
+      
+      group.appendChild(icon);
+      group.appendChild(content);
+      messagesDiv.appendChild(group);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function initialize() {
+      addBotMessage('안녕하세요! 👋\nC&M Smart AI Chatbot입니다!\nDVM-675 정보를 제공합니다.\n모델을 선택해주세요.');
+      renderModelButtons();
+    }
+
+    function renderModelButtons() {
+      modelButtonsDiv.innerHTML = '';
+      models.forEach(model => {
+        const btn = document.createElement('button');
+        btn.className = `model-btn ${selectedModel === model ? 'active' : ''}`;
+        btn.textContent = model;
+        btn.onclick = () => selectModel(model);
+        modelButtonsDiv.appendChild(btn);
+      });
+    }
+
+    function renderCategoryButtons() {
+      if (!selectedModel) return;
+      categoryButtonsDiv.innerHTML = '';
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'category-btn';
+        btn.textContent = cat;
+        btn.onclick = () => showInfo(selectedModel, cat);
+        categoryButtonsDiv.appendChild(btn);
+      });
+    }
+
+    function selectModel(model) {
+      selectedModel = model;
+      renderModelButtons();
+      renderCategoryButtons();
+      addUserMessage(model);
+      setTimeout(() => {
+        addBotMessage(`✓ ${model} 선택됨`);
+      }, 300);
+    }
+
+    function showInfo(model, category) {
+      addUserMessage(category);
+      const info = infoData[model][category];
+      setTimeout(() => {
+        addBotMessage(info);
+      }, 300);
+    }
+
+    function handleInput() {
+      const text = inputField.value.trim();
+      if (!text) return;
+
+      addUserMessage(text);
+      inputField.value = '';
+
+      if (!selectedModel) {
+        setTimeout(() => {
+          addBotMessage('먼저 모델을 선택해주세요.');
+        }, 300);
+        return;
+      }
+
+      const lowerText = text.toLowerCase();
+      let response = '';
+
+      if (lowerText.includes('교체') || lowerText.includes('변경') || lowerText.includes('사양') || lowerText.includes('하우징') || lowerText.includes('하네스') || lowerText.includes('샤프트')) {
+        response = infoData[selectedModel]['· 모델 교체 사양'];
+      }
+      else if (lowerText.includes('순서') || lowerText.includes('rotor') || lowerText.includes('shaft')) {
+        response = infoData[selectedModel]['· 모델 교체 순서'];
+      }
+      else if (lowerText.includes('포장') || lowerText.includes('제품') || lowerText.includes('파렛트') || lowerText.includes('밴딩')) {
+        response = infoData[selectedModel]['· 포장 순서'];
+      }
+      else {
+        response = `질문: "${text}"\n\n죄송합니다. 정확한 정보를 찾기 어렵습니다.\n다음 키워드로 검색해보세요:\n- 교체/변경/사양 → 모델 교체 사양\n- 순서 → 모델 교체 순서\n- 포장/제품 → 포장 순서`;
+      }
+
+      setTimeout(() => {
+        addBotMessage(response);
+      }, 300);
+    }
+
+    sendBtn.onclick = handleInput;
+    inputField.onkeypress = (e) => {
+      if (e.key === 'Enter') handleInput();
+    };
+
+    initialize();
   </script>
 </body>
 </html>
