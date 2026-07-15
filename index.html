@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C&M Smart AI Chatbot</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2d8659" />
+  <meta name="description" content="C&M Smart AI Chatbot - 제품 정보 제공" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="C&M Chatbot" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --surface-0: #ffffff;
+      --surface-1: #f5f5f5;
+      --text-primary: #000000;
+      --text-secondary: #666666;
+      --text-muted: #999999;
+      --bot-bg: #e8e8e8;
+      --bot-text: #000000;
+      --user-bg: #0084ff;
+      --user-text: #ffffff;
+      --accent: #2d8659;
+      --border: #d4d4d4;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --surface-0: #0a0a0a;
+        --surface-1: #1a1a1a;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --text-muted: #808080;
+        --bot-bg: #2a2a2a;
+        --bot-text: #ffffff;
+        --border: #333333;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--surface-0);
+      color: var(--text-primary);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    #app {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .header {
+      background-color: var(--surface-1);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-icon {
+      width: 40px;
+      height: 40px;
+      background-color: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .header-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message-group {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .message-group.bot {
+      justify-content: flex-start;
+    }
+
+    .message-group.user {
+      justify-content: flex-end !important;
+      flex-direction: row-reverse !important;
+      margin-left: auto !important;
+      width: auto;
+    }
+
+    .message-icon {
+      width: 32px;
+      height: 32px;
+      background-color: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .message-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 70%;
+      width: auto;
+    }
+
+    .message-group.user .message-content {
+      align-items: flex-end;
+    }
+
+    .message-bubble {
+      background-color: var(--bot-bg);
+      color: var(--bot-text);
+      padding: 10px 14px;
+      border-radius: 12px 12px 12px 0;
+      font-size: 14px;
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .message-group.user .message-bubble {
+      background-color: var(--user-bg);
+      color: var(--user-text);
+      border-radius: 12px 12px 0 12px;
+    }
+
+    .message-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0 8px;
+    }
+
+    .buttons-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px;
+      background-color: var(--surface-1);
+      border-top: 1px solid var(--border);
+      justify-content: center;
+    }
+
+    .buttons-section:empty {
+      display: none;
+    }
+
+    .buttons-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background-color: var(--surface-1);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .buttons-header:hover {
+      background-color: rgba(45, 134, 89, 0.1);
+    }
+
+    .buttons-toggle-arrow {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--accent);
+      transition: transform 0.3s ease;
+    }
+
+    .buttons-toggle-arrow.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .buttons-header-text {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .buttons-container {
+      max-height: 1000px;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .buttons-container.collapsed {
+      max-height: 0;
+    }
+
+    .category-btn, .model-btn, .info-btn, .detail-btn {
+      padding: 10px 16px;
+      background-color: var(--surface-0);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .category-btn:hover, .model-btn:hover, .info-btn:hover, .detail-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .category-btn.active, .model-btn.active {
+      background-color: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .info-btn, .detail-btn {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .input-section {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background-color: var(--surface-1);
+      border-top: 1px solid var(--border);
+    }
+
+    .input-field {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-size: 14px;
+      background-color: var(--surface-0);
+      color: var(--text-primary);
+      font-family: inherit;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent);
+    }
+
+    .send-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .send-btn:hover {
+      opacity: 0.9;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--surface-0);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <div class="header-icon">💬</div>
+      <div>
+        <div class="header-title">C&M Smart AI Chatbot</div>
+        <div class="header-status">
+          <span>● 온라인 상태</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="buttons-header" id="buttonsHeader">
+      <span class="buttons-toggle-arrow" id="toggleArrow">▼</span>
+      <span class="buttons-header-text">카테고리 선택</span>
+    </div>
+
+    <div class="buttons-container" id="buttonsContainer">
+      <div class="buttons-section" id="categoryButtons"></div>
+      <div class="buttons-section" id="subcategoryButtons"></div>
+      <div class="buttons-section" id="modelButtons"></div>
+      <div class="buttons-section" id="infoButtons"></div>
+      <div class="buttons-section" id="detailButtons"></div>
+    </div>
+
+    <div class="input-section">
+      <input type="text" class="input-field" id="inputField" placeholder="무엇이든 물어보세요." />
+      <button class="send-btn" id="sendBtn">➤</button>
+    </div>
+  </div>
+
+  <script>
+    const dvmSpecs = {
+      'DVM-675A/B': '675A/B는\n- 하우징 : 600W\n- 하네스 : A_흰색, B_노란색\n- 샤프트 : 200mm',
+      'DVM-675E/F': '675E/F는\n- 하우징 : 600W\n- 하네스 : E_흰색, F_노란색\n- 샤프트 : 250mm',
+      'DVM-675L': '675L는\n- 하우징 : 900W\n- 하네스 : 파란색\n- 샤프트 : 220mm',
+      'DVM-675G': '675G는\n- 하우징 : 900W\n- 하네스 : 초록색\n- 샤프트 : 200mm',
+      'DVM-675H': '675H는\n- 하우징 : 600W\n- 하네스 : 빨간색\n- 샤프트 : 200mm'
+    };
+
+    const dvmOrderText = '1) 하우징 변경\n2) 모델 별 Rotor 확인 및 Robot 대차 투입 → Start\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 터치 판넬 길이 설정 (판넬 클릭)\n5) 착자 공정 600W or 900W 설정 (마우스 클릭)\n6) 역기 전력 PC 600W or 900W 설정 (마우스 클릭)\n7) 검사기 터치 판넬, 모델 별 높이 설정 (판넬 클릭)\n8) 내전압 PC 모델명 변경(마우스 클릭)\n9) MES PC 실적 모델 변경 (마우스 클릭)';
+
+    const dvmPackingText = '1) 파렛트 준비\n2) 포장물 준비 (하부 커버 → 비닐백 → PAD)\n3) 포장물 내 DVM Cross PAD 펼치기\n4) 실리카겔 - Cross PAD 1층마다 1개 넣기\n5) 양산 제품 순차 적재 (1단 : 16개)\n6) (1단 적재 완료 시) PAD 안착 → Cross PAD 펼치기 → 제품 순차 적재 (반복)\n   * 4단 : 64개 완료 시 PAD 안착 마무리\n7) 비닐백 씌우기\n8) Side Box 씌우기\n9) 상부 커버 닫기\n10) Side Box에 모델 별 정보 적기 (모델(도장), 날짜, 작업자명)\n11) 제품 밴딩\n12) 출하 라벨 부착';
+
+    const productData = {
+      '에어컨모터 DVM': {
+        'DVM-675A/B': {
+          '· 모델 교체 사양': '모델 교체 사양\n\n' + dvmSpecs['DVM-675A/B'],
+          '· 모델 교체 순서': '모델 교체 순서\n\n' + dvmOrderText,
+          '· 포장 순서': '포장 순서\n\n' + dvmPackingText
+        },
+        'DVM-675E/F': {
+          '· 모델 교체 사양': '모델 교체 사양\n\n' + dvmSpecs['DVM-675E/F'],
+          '· 모델 교체 순서': '모델 교체 순서\n\n' + dvmOrderText,
+          '· 포장 순서': '포장 순서\n\n' + dvmPackingText
+        },
+        'DVM-675L': {
+          '· 모델 교체 사양': '모델 교체 사양\n\n' + dvmSpecs['DVM-675L'],
+          '· 모델 교체 순서': '모델 교체 순서\n\n' + dvmOrderText,
+          '· 포장 순서': '포장 순서\n\n' + dvmPackingText
+        },
+        'DVM-675G': {
+          '· 모델 교체 사양': '모델 교체 사양\n\n' + dvmSpecs['DVM-675G'],
+          '· 모델 교체 순서': '모델 교체 순서\n\n' + dvmOrderText,
+          '· 포장 순서': '포장 순서\n\n' + dvmPackingText
+        },
+        'DVM-675H': {
+          '· 모델 교체 사양': '모델 교체 사양\n\n' + dvmSpecs['DVM-675H'],
+          '· 모델 교체 순서': '모델 교체 순서\n\n' + dvmOrderText,
+          '· 포장 순서': '포장 순서\n\n' + dvmPackingText
+        }
+      },
+      '에어컨모터 125W': {
+        'A라인': {
+          '125W-658A': {
+            '· 모델 교체 사양': '125W-658A는\n\n- 하우징 : 25T_AL\n- PBA Code : DB92-04210A\n- 하네스 : 하얀색\n- 하네스 길이 : 1,420mm\n- Rotor : 149.4mm\n- 홈 : 없음\n- 마그넷 : 20 * 30 *7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          },
+          '125W-658B': {
+            '· 모델 교체 사양': '125W-658B는\n\n- 하우징 : 25T_AL\n- PBA Code : DB92-04975B\n- 하네스 : 파란색\n- 하네스 길이 : 1,100mm\n- Rotor : 149.4mm\n- 홈 있음\n- 마그넷 : 20 * 30 *7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          },
+          '125W-658K': {
+            '· 모델 교체 사양': '125W-658K는\n\n- 하우징 : 28.5T_AL\n- PBA Code : DB92-05812A\n- 하네스 : 초록색\n- 하네스 길이 : 1,420mm\n- Rotor : 152.9mm\n- 홈 있음\n- 마그넷 : B20.3 * 7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          },
+          '125W-658L': {
+            '· 모델 교체 사양': '125W-658L는\n\n- 하우징 : 28.5T_CU\n- PBA Code : DB92-05812A\n- 하네스 : 초록색\n- 하네스 길이 : 1,420mm\n- Rotor : 152.9mm\n- 홈 있음\n- 마그넷 : B20.3 * 7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          },
+          '125W-658J': {
+            '· 모델 교체 사양': '125W-658J는\n\n- 하우징 : 28.5T_AL\n- PBA Code : DB92-04975G\n- 하네스 : 빨간색\n- 하네스 길이 : 1,420mm\n- Rotor : 152.9mm\n- 홈 있음\n- 마그넷 : B20.3 * 7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          },
+          'AFM125B5GMAAAR': {
+            '· 모델 교체 사양': 'AFM125B5GMAAAR\n\n- 하우징 : 28.5T_AL\n- PBA Code : DB92-04975D\n- 하네스 : 노란색\n- 하네스 길이 : 1,100mm\n- Rotor : 152.9mm\n- 홈 있음\n- 마그넷 : B20.3 * 7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          }
+        },
+        'B라인': {
+          '125W-658A': {
+            '· 모델 교체 사양': '125W-658A는\n\n- 하우징 : 25T_AL\n- PBA Code : DB92-04210A\n- 하네스 : 하얀색\n- 하네스 길이 : 1,420mm\n- Rotor : 149.4mm\n- 홈 : 없음\n- 마그넷 : 20 * 30 *7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          },
+          '125W-658B': {
+            '· 모델 교체 사양': '125W-658B는\n\n- 하우징 : 25T_AL\n- PBA Code : DB92-04975B\n- 하네스 : 파란색\n- 하네스 길이 : 1,100mm\n- Rotor : 149.4mm\n- 홈 있음\n- 마그넷 : 20 * 30 *7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          },
+          '125W-658K': {
+            '· 모델 교체 사양': '125W-658K는\n\n- 하우징 : 28.5T_AL\n- PBA Code : DB92-05812A\n- 하네스 : 초록색\n- 하네스 길이 : 1,420mm\n- Rotor : 152.9mm\n- 홈 있음\n- 마그넷 : B20.3 * 7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          },
+          '125W-658L': {
+            '· 모델 교체 사양': '125W-658L는\n\n- 하우징 : 28.5T_CU\n- PBA Code : DB92-05812A\n- 하네스 : 초록색\n- 하네스 길이 : 1,420mm\n- Rotor : 152.9mm\n- 홈 있음\n- 마그넷 : B20.3 * 7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          },
+          '125W-658J': {
+            '· 모델 교체 사양': '125W-658J는\n\n- 하우징 : 28.5T_AL\n- PBA Code : DB92-04975G\n- 하네스 : 빨간색\n- 하네스 길이 : 1,420mm\n- Rotor : 152.9mm\n- 홈 있음\n- 마그넷 : B20.3 * 7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          },
+          'AFM125B5GMAAAR': {
+            '· 모델 교체 사양': 'AFM125B5GMAAAR\n\n- 하우징 : 28.5T_AL\n- PBA Code : DB92-04975D\n- 하네스 : 노란색\n- 하네스 길이 : 1,100mm\n- Rotor : 152.9mm\n- 홈 있음\n- 마그넷 : B20.3 * 7.5T',
+            '· Rotor 모델 교체 순서': null,
+            '· 솔더링 모델 교체 순서': '솔더링 모델 교체 순서\n\n1) 하우징 변경\n2) 모델 별 Rotor 확인\n3) 모델 별 Shaft JIG 길이 확인\n4) 베어링 압입 공정 진행\n5) 착자 공정 설정\n6) MES PC 실적 모델 변경\n7) 점검 및 테스트\n8) 작업 완료',
+            '· 검사 모델 교체 순서': '검사 모델 교체 순서\n\n(준비 중)',
+            '· 솔더링 소모품 교체 방법': '솔더링 소모품 교체 방법\n\n(준비 중)'
+          }
+        }
+      },
+      '세탁기모터': {
+        'WM986AMT': {'· 모델 차이점': '모델 차이점\n\nWM986AMT는\n- 용량 : 8.5kg\n- RPM : 1200\n- 냉각방식 : 풍냉\n- 특징 : 표준 모델','· 모델 교체 순서': '모델 교체 순서\n\n1) 전원 차단 확인\n2) 드럼 제거\n3) 모터 고정 나사 풀기\n4) 모터 제거\n5) 새 모터 장착\n6) 나사 조임 (토크 값: 25Nm)\n7) 드럼 재설치\n8) 작동 테스트\n9) 운전음 확인','· 포장 순서': '포장 순서\n\n1) 모터 부품 검사\n2) 부품별 포장 (개별 포장)\n3) 완충재 삽입\n4) 상자 포장\n5) 라벨 부착\n6) 무게 측정\n7) 바코드 인쇄\n8) 팔렛트 준비\n9) 출하 준비'},
+        'WM00986BMT': {'· 모델 차이점': '모델 차이점\n\nWM00986BMT는\n- 용량 : 9.0kg\n- RPM : 1200\n- 냉각방식 : 수냉\n- 특징 : 고용량 모델','· 모델 교체 순서': '모델 교체 순서\n\n1) 전원 차단 확인\n2) 드럼 제거\n3) 모터 고정 나사 풀기\n4) 모터 제거\n5) 새 모터 장착\n6) 나사 조임 (토크 값: 25Nm)\n7) 드럼 재설치\n8) 작동 테스트\n9) 운전음 확인','· 포장 순서': '포장 순서\n\n1) 모터 부품 검사\n2) 부품별 포장 (개별 포장)\n3) 완충재 삽입\n4) 상자 포장\n5) 라벨 부착\n6) 무게 측정\n7) 바코드 인쇄\n8) 팔렛트 준비\n9) 출하 준비'},
+        'WM00986CMT': {'· 모델 차이점': '모델 차이점\n\nWM00986CMT는\n- 용량 : 10.0kg\n- RPM : 1400\n- 냉각방식 : 공냉\n- 특징 : 최고용량 모델','· 모델 교체 순서': '모델 교체 순서\n\n1) 전원 차단 확인\n2) 드럼 제거\n3) 모터 고정 나사 풀기\n4) 모터 제거\n5) 새 모터 장착\n6) 나사 조임 (토크 값: 30Nm)\n7) 드럼 재설치\n8) 작동 테스트\n9) 운전음 확인','· 포장 순서': '포장 순서\n\n1) 모터 부품 검사\n2) 부품별 포장 (개별 포장)\n3) 완충재 삽입\n4) 상자 포장\n5) 라벨 부착\n6) 무게 측정\n7) 바코드 인쇄\n8) 팔렛트 준비\n9) 출하 준비'}
+      },
+      '사출': {
+        'DC97-23573A': {'· 설비 시운전 방법': '설비 시운전 방법\n\n1) 전원 공급 확인\n2) 압력 게이지 초기화\n3) 오일 레벨 확인\n4) 펌프 운전 테스트\n5) 온도 센서 확인\n6) 밸브 작동 테스트\n7) 알람 시스템 테스트\n8) 안전장치 점검\n9) 공회전 운전 (30분)\n10) 최종 점검 및 보고','· 설비 주요 알람 조회': '설비 주요 알람 조회\n\nE001: 고온 경보 (온도 > 80°C)\nE002: 저온 경보 (온도 < 10°C)\nE003: 고압 경보 (압력 > 250bar)\nE004: 저압 경보 (압력 < 50bar)\nE005: 오일 부족 경보\nE006: 펌프 고장 경보\nE007: 센서 오류\nE008: 통신 오류\nE009: 안전장치 작동\nE010: 전원 이상\n\n알람 해제 방법:\n- 원인 제거 후 리셋 버튼 누르기\n- 시스템 재부팅'}
+      }
+    };
+
+    const rotorDetails = {
+      'A라인': {
+        '25T → 28.5T 방법': '1) Rotor 공급 설비 판넬에서 Rotor Pass 클릭 → 잔량 배출\n2) 착자 공정 잔량 처리 OFF → ON 변경 (1회 클릭) 후 다시 OFF 확인\n3) Rotor 잔량 수량만큼 하우징 투입 및 잔량 하우징 배출\n4) 기존 25T 라인 전체 비우기\n5) Rotor Box 투입부 자동 → 수동 (버튼 스위치)\n6) 모델에 맞는 대차 투입 후 리셋 버튼 3초 이상 누르기\n7) 삐!, 소리나면 수동 → 자동 → 리셋 1회 (버튼 스위치)\n8) 마그넷 조립/본딩 판넬에서 수동 전환\n9) 마그넷 공급/삽입부 화면 → 삽입 재가압 TOOL 25T → 28.5T 변경 (1번 누르기)\n10) 잔량 마그넷 배출 (수작업) : 반대로 넘어가서 직접 빼기\n11) 모델에 맞는 마그넷 투입 (수작업) : 직접 투입\n12) 본딩 공정 후면 부 도어 열기\n13) 본딩 공정 1차, 2차 적층 JIG 4개 교체 후 문 닫기\n     * 1차 2개, 2차 2개\n14) 베어링 압입 설비 판넬 수동 후 도어 닫힘 1회 누르기\n15) 문열고 접착력 검사 적층 JIG 1개 추가 후(총 3개) 조립/본드 판넬 자동 누르기\n16) E링 적층 JIG 방향 전환 (1개)\n17) 베어링 압입/검사 판넬 → 180도 TURN → 상부 Bolt 이완 후 기구부 전진 → Bolt 조이기\n18) 베어링 압입 검사 실시 → 베어링간 거리 JIG 마스터 측정\n    * JIG 안착 후 베어링 압입/검사 판넬 후면 GUIDE 실린더 전진 + 전후진 실린더 전진\n    ** 전진 시 측정값 평균 72.0 [상한 72.20, 하한 71.80 이내]\n19) 측정 후 JIG 제거 및 판넬에서 정위치 버튼 누르기\n20) 셔틀 레버 좌측 변경 후 도어 닫고 판넬 자동(시작)\n21) 착자 공정 판넬 수동 → 문열고 투입부 적층 지그 좌측 이동시키기\n22) 착자 Location 센서 위쪽에 연결\n23) 착자 프로그램 → 모델 관리 → 해당 모델 지정[더블클릭] → 저장 → 검사 화면 → 도어 닫고 판넬 시작\n24) 박스 투입 공정 판넬 수동 → 메뉴 → 박스 투입/배출 수동 → Lift 하강 및 배출부 하강\n25) 모델에 맞는 박스 투입\n26) 하우징 공급부 - 공급 작업 번호 1번 설정 후 시작\n27) Wave Washer 공정 판넬 수동\n28) 내전압 공정 적층 JIG 삽입\n29) 도어 열고 Rotor 조립 로딩 전/후진 실린더 상부 적층 JIG 삽입 후 시작',
+        '28.5T → 25T 방법': '28.5T → 25T로 변경하는 방법\n\n(준비 중)'
+      }
+    };
+
+    let selectedCategory = null;
+    let selectedSubcategory = null;
+    let selectedModel = null;
+    let selectedInfo = null;
+
+    const messagesDiv = document.getElementById('messages');
+    const categoryButtonsDiv = document.getElementById('categoryButtons');
+    const subcategoryButtonsDiv = document.getElementById('subcategoryButtons');
+    const modelButtonsDiv = document.getElementById('modelButtons');
+    const infoButtonsDiv = document.getElementById('infoButtons');
+    const detailButtonsDiv = document.getElementById('detailButtons');
+    const inputField = document.getElementById('inputField');
+    const sendBtn = document.getElementById('sendBtn');
+    const buttonsHeader = document.getElementById('buttonsHeader');
+    const toggleArrow = document.getElementById('toggleArrow');
+    const buttonsContainer = document.getElementById('buttonsContainer');
+
+    // 카테고리 섹션 토글
+    buttonsHeader.onclick = () => {
+      buttonsContainer.classList.toggle('collapsed');
+      toggleArrow.classList.toggle('collapsed');
+    };
+
+    function getTime() {
+      const now = new Date();
+      return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function addBotMessage(text) {
+      const group = document.createElement('div');
+      group.className = 'message-group bot';
+      const icon = document.createElement('div');
+      icon.className = 'message-icon';
+      icon.textContent = '🤖';
+      const content = document.createElement('div');
+      content.className = 'message-content';
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.textContent = text;
+      content.appendChild(bubble);
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = getTime();
+      content.appendChild(time);
+      group.appendChild(icon);
+      group.appendChild(content);
+      messagesDiv.appendChild(group);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function addUserMessage(text) {
+      const group = document.createElement('div');
+      group.className = 'message-group user';
+      const icon = document.createElement('div');
+      icon.className = 'message-icon';
+      icon.textContent = '👤';
+      const content = document.createElement('div');
+      content.className = 'message-content';
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.textContent = text;
+      content.appendChild(bubble);
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = getTime();
+      content.appendChild(time);
+      group.appendChild(icon);
+      group.appendChild(content);
+      messagesDiv.appendChild(group);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function initialize() {
+      addBotMessage('안녕하세요! 👋\nC&M Smart AI Chatbot입니다!\n제품 정보를 제공합니다.\n카테고리를 선택해주세요.');
+      renderCategoryButtons();
+    }
+
+    function renderCategoryButtons() {
+      categoryButtonsDiv.innerHTML = '';
+      Object.keys(productData).forEach(category => {
+        const btn = document.createElement('button');
+        btn.className = `category-btn ${selectedCategory === category ? 'active' : ''}`;
+        btn.textContent = category;
+        btn.onclick = () => selectCategory(category);
+        categoryButtonsDiv.appendChild(btn);
+      });
+    }
+
+    function renderSubcategoryButtons() {
+      subcategoryButtonsDiv.innerHTML = '';
+      if (!selectedCategory) return;
+      if (selectedCategory === '에어컨모터 125W') {
+        const subcats = Object.keys(productData[selectedCategory]);
+        subcats.forEach(subcat => {
+          const btn = document.createElement('button');
+          btn.className = `category-btn ${selectedSubcategory === subcat ? 'active' : ''}`;
+          btn.textContent = subcat;
+          btn.onclick = () => selectSubcategory(subcat);
+          subcategoryButtonsDiv.appendChild(btn);
+        });
+      }
+    }
+
+    function renderModelButtons() {
+      modelButtonsDiv.innerHTML = '';
+      if (!selectedCategory) return;
+      let models = {};
+      if (selectedCategory === '에어컨모터 125W' && selectedSubcategory) {
+        models = productData[selectedCategory][selectedSubcategory];
+      } else if (selectedCategory !== '에어컨모터 125W') {
+        models = productData[selectedCategory];
+      }
+      Object.keys(models).forEach(model => {
+        const btn = document.createElement('button');
+        btn.className = `model-btn ${selectedModel === model ? 'active' : ''}`;
+        btn.textContent = model;
+        btn.onclick = () => selectModel(model);
+        modelButtonsDiv.appendChild(btn);
+      });
+    }
+
+    function renderInfoButtons() {
+      infoButtonsDiv.innerHTML = '';
+      if (!selectedModel) return;
+      let modelData = {};
+      if (selectedCategory === '에어컨모터 125W' && selectedSubcategory) {
+        modelData = productData[selectedCategory][selectedSubcategory][selectedModel];
+      } else if (selectedCategory !== '에어컨모터 125W') {
+        modelData = productData[selectedCategory][selectedModel];
+      }
+      Object.keys(modelData).forEach(info => {
+        const btn = document.createElement('button');
+        btn.className = 'info-btn';
+        btn.textContent = info;
+        btn.onclick = () => selectInfo(info);
+        infoButtonsDiv.appendChild(btn);
+      });
+    }
+
+    function renderDetailButtons() {
+      detailButtonsDiv.innerHTML = '';
+      if (selectedCategory === '에어컨모터 125W' && selectedInfo === '· Rotor 모델 교체 순서' && selectedSubcategory === 'A라인') {
+        const details = rotorDetails['A라인'];
+        if (details) {
+          Object.keys(details).forEach(detail => {
+            const btn = document.createElement('button');
+            btn.className = 'detail-btn';
+            btn.textContent = detail;
+            btn.onclick = () => showDetail(detail);
+            detailButtonsDiv.appendChild(btn);
+          });
+        }
+      }
+    }
+
+    function selectCategory(category) {
+      selectedCategory = category;
+      selectedSubcategory = null;
+      selectedModel = null;
+      selectedInfo = null;
+      renderCategoryButtons();
+      renderSubcategoryButtons();
+      renderModelButtons();
+      infoButtonsDiv.innerHTML = '';
+      detailButtonsDiv.innerHTML = '';
+      addUserMessage(category);
+      setTimeout(() => {
+        if (category === '에어컨모터 125W') {
+          addBotMessage(`✓ ${category} 선택됨\n\n라인을 선택해주세요.`);
+        } else {
+          addBotMessage(`✓ ${category} 선택됨\n\n모델을 선택해주세요.`);
+        }
+      }, 300);
+    }
+
+    function selectSubcategory(subcat) {
+      selectedSubcategory = subcat;
+      selectedModel = null;
+      selectedInfo = null;
+      renderSubcategoryButtons();
+      renderModelButtons();
+      infoButtonsDiv.innerHTML = '';
+      detailButtonsDiv.innerHTML = '';
+      addUserMessage(subcat);
+      setTimeout(() => {
+        addBotMessage(`✓ ${subcat} 선택됨\n\n모델을 선택해주세요.`);
+      }, 300);
+    }
+
+    function selectModel(model) {
+      selectedModel = model;
+      selectedInfo = null;
+      renderModelButtons();
+      renderInfoButtons();
+      detailButtonsDiv.innerHTML = '';
+      addUserMessage(model);
+      setTimeout(() => {
+        addBotMessage(`✓ ${model} 선택됨\n\n정보를 선택해주세요.`);
+      }, 300);
+    }
+
+    function selectInfo(info) {
+      selectedInfo = info;
+      renderDetailButtons();
+      addUserMessage(info);
+      let modelData = {};
+      if (selectedCategory === '에어컨모터 125W' && selectedSubcategory) {
+        modelData = productData[selectedCategory][selectedSubcategory][selectedModel];
+      } else if (selectedCategory !== '에어컨모터 125W') {
+        modelData = productData[selectedCategory][selectedModel];
+      }
+      const infoText = modelData[info];
+      setTimeout(() => {
+        if (infoText === null) {
+          addBotMessage(`✓ ${info} 선택됨\n\n세부 항목을 선택해주세요.`);
+        } else {
+          addBotMessage(infoText);
+        }
+      }, 300);
+    }
+
+    function showDetail(detail) {
+      addUserMessage(detail);
+      const detailText = rotorDetails['A라인'][detail];
+      setTimeout(() => {
+        addBotMessage(detailText);
+      }, 300);
+    }
+
+    function handleInput() {
+      const text = inputField.value.trim();
+      if (!text) return;
+      addUserMessage(text);
+      inputField.value = '';
+      
+      if (!selectedModel) {
+        setTimeout(() => {
+          addBotMessage('먼저 카테고리, 모델을 선택해주세요.');
+        }, 300);
+        return;
+      }
+
+      const lowerText = text.toLowerCase();
+      let modelData = {};
+      if (selectedCategory === '에어컨모터 125W' && selectedSubcategory) {
+        modelData = productData[selectedCategory][selectedSubcategory][selectedModel];
+      } else if (selectedCategory !== '에어컨모터 125W') {
+        modelData = productData[selectedCategory][selectedModel];
+      }
+
+      let response = '';
+
+      // 모델 교체/변경 검색
+      if (lowerText.includes('교체') || lowerText.includes('변경') || lowerText.includes('사양')) {
+        response = modelData['· 모델 교체 사양'];
+      }
+      // 순서 검색
+      else if (lowerText.includes('순서')) {
+        if (modelData['· 모델 교체 순서']) {
+          response = modelData['· 모델 교체 순서'];
+        } else if (modelData['· Rotor 모델 교체 순서']) {
+          response = '세부 항목을 선택해주세요.';
+        }
+      }
+      // 포장 검색
+      else if (lowerText.includes('포장') || lowerText.includes('제품')) {
+        response = modelData['· 포장 순서'];
+      }
+
+      if (!response) {
+        response = `질문: "${text}"\n\n죄송합니다. 정확한 정보를 찾기 어렵습니다.\n정보 버튼을 선택해주세요.`;
+      }
+
+      setTimeout(() => {
+        addBotMessage(response);
+      }, 300);
+    }
+
+    sendBtn.onclick = handleInput;
+    inputField.onkeypress = (e) => {
+      if (e.key === 'Enter') handleInput();
+    };
+    initialize();
+  </script>
+</body>
+</html>
